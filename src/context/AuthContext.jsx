@@ -7,20 +7,44 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // const fetchUser = async () => {
+  //   try {
+  //     const res = await api.get("/auth/me");
+  //     if (res.data?.user) {
+  //       setUser(res.data.user);
+  //     } else {
+  //       setUser(null);
+  //     }
+  //   } catch {
+  //     setUser(null);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const fetchUser = async () => {
-    try {
-      const res = await api.get("/auth/me");
-      if (res.data?.user) {
-        setUser(res.data.user);
-      } else {
+  try {
+    const res = await api.get("/auth/me");
+
+    if (res.data?.user) {
+      setUser(res.data.user);
+      return;
+    }
+
+    setUser(null);
+  } catch {
+    setTimeout(async () => {
+      try {
+        const retry = await api.get("/auth/me");
+        if (retry.data?.user) setUser(retry.data.user);
+      } catch {
         setUser(null);
       }
-    } catch {
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+    }, 400);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchUser();
